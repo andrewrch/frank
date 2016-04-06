@@ -5,27 +5,33 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLFW REQUIRED)
 
+add_subdirectory(include)
 add_subdirectory(src)
 
 add_library(
   frank
   SHARED
+  ${FRANK_HEADERS}
   ${FRANK_SRC}
 )
 
+add_definitions(-DGLEW_STATIC)
+
 target_link_libraries(frank
   ${OpenGL_LIBRARIES}
-  ${GLEW_LIBRARIES}
-  ${GLFW_STATIC_LIBRARIES}
-  ${FT_LIBRARIES}
-  "-ljpeg"
+  ${OPENGL_gl_LIBRARY}
+  ${OPENGL_glu_LIBRARY}
+  ${GLEW_LIBRARY}
+  ${GLFW_glfw_LIBRARIES}
   )
 
-include_directories(
+target_include_directories(
+  frank
+  PUBLIC
   "include"
   "ext/linmath.h"
-  ${GLFW_INCLUDE_DIRS}
-  ${FT_INCLUDE_DIRS}
+  ${GLFW_INCLUDE_DIR}
+  ${GLEW_INCLUDE_DIR}
   )
 
 target_compile_features(frank PRIVATE cxx_range_for)
@@ -41,6 +47,3 @@ add_custom_target(release
   COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all
   COMMENT "Switch CMAKE_BUILD_TYPE to Release"
   )
-
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")

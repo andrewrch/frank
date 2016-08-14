@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
 project(frank CXX)
 
 find_package(OpenGL REQUIRED)
@@ -22,7 +22,7 @@ target_link_libraries(frank
   ${OPENGL_gl_LIBRARY}
   ${OPENGL_glu_LIBRARY}
   ${GLEW_LIBRARY}
-  ${GLFW_glfw_LIBRARIES}
+  ${GLFW_LIBRARIES}
   )
 
 target_include_directories(

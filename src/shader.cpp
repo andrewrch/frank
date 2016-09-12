@@ -9,7 +9,7 @@ Shader::Shader(GLenum type)
 {
 }
 
-Shader Shader::FromFile(GLenum type, const std::string& filename)
+std::unique_ptr<Shader> Shader::FromFile(GLenum type, const std::string& filename)
 {
 	std::string source;
 	{
@@ -18,12 +18,7 @@ Shader Shader::FromFile(GLenum type, const std::string& filename)
 					  std::istreambuf_iterator<char>());
 		f.close();
 	}
-	return Shader::FromSource(type, source);
-}
-
-Shader::operator std::shared_ptr<Shader>() const 
-{
-	return std::make_shared<Shader>(*this);
+	return Shader::FromSource(type, std::move(source));
 }
 
 void Shader::compile()
@@ -36,6 +31,16 @@ void Shader::compile()
 	}
 	glShaderSource(shader, ptrs.size(), ptrs.data(), NULL);
 	glCompileShader(shader);
+	GLint compiled = 0;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+	if (!compiled)
+	{
+		GLint len = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+		std::vector<GLchar> errorLog(len);
+		glGetShaderInfoLog(shader, len, &len, errorLog.data());
+
+	}
 }
 
 }

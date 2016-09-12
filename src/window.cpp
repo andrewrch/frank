@@ -3,7 +3,10 @@
 #include <stdexcept>
 #include <functional>
 
+#include <GL/glew.h>
 #include "GLFW/glfw3.h"
+#include <assert.h>
+
 
 namespace frank
 {
@@ -21,13 +24,22 @@ public:
 
 	GLFWwindow* getWindow();
 private:
-	std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window;
+	typedef std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> WindowPtr;
+	WindowPtr window;
 };
 
-
-WindowImpl::WindowImpl(int w, int h, const std::string& title)
-	: window(glfwCreateWindow(w, h, title.c_str(), NULL, NULL), glfwDestroyWindow)
-{
+WindowImpl::WindowImpl(int w, int h, const std::string& title)	
+	: window(NULL, glfwDestroyWindow)
+{	
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	window = WindowPtr(glfwCreateWindow(w, h, title.c_str(), NULL, NULL), glfwDestroyWindow);
+	glfwMakeContextCurrent(window.get());
+	glewExperimental = GL_TRUE;
+	GLenum err = glewInit();
+	assert(err == GL_NO_ERROR);
 	glfwSetWindowUserPointer(window.get(), this);
 }
 
@@ -59,8 +71,8 @@ void WindowImpl::errorCB(int, const char*)
 }
 
 Window::Window(int width, int height)
+	: impl(new WindowImpl(width, height, "Window"))
 {
-	impl = std::make_unique<WindowImpl>(width, height, "Window");
 	// Setup callbacks	
 	glfwSetErrorCallback(&WindowImpl::errorCB);
 	glfwSetKeyCallback(impl->getWindow(), &WindowImpl::keyboardCB);

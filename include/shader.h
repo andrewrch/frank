@@ -1,9 +1,11 @@
 #pragma once
 
+
 #include <gl/glew.h>
 #include <vector>
 #include <memory>
 #include "handle.h"
+#include "frank.h"
 
 namespace frank
 {
@@ -27,35 +29,37 @@ namespace frank
 	}
 
 	using ShaderHandle = Handle<detail::CreateShader, detail::DeleteShader>;
-	class Shader : public ShaderHandle
+	class FRANK_EXPORT Shader : public ShaderHandle
 	{
 	public:
-		Shader() = delete;
+		Shader(GLenum type);
+		~Shader() {}
+		static std::unique_ptr<Shader> FromFile(GLenum type, const std::string& filename);
 
-		static Shader FromFile(GLenum type, const std::string& filename);
 		template <typename ... Strings>
-		static Shader FromSource(GLenum type, const Strings& ... source)
+		static std::unique_ptr<Shader> FromSource(GLenum type, Strings&& ... source)
 		{
-			Shader s(type);
-			s.addSource(source...);
+			auto s = std::make_unique<Shader>(type);
+			s->addSource(std::forward<Strings>(source)...);
 			return s;
 		}
 
-		operator std::shared_ptr<Shader>() const;
-
-		template <typename... Strings>
-		void addSource(const std::string& src, Strings... more)
+		template <typename T>
+		void addSource(T&& src)
 		{
-			source.push_back(src);
-			addSource(more...);
+			source.emplace_back(std::forward<T>(src));
+		}
+
+		template <typename T, typename... Ts>
+		void addSource(T&& src, Ts&&... more)
+		{
+			source.emplace_back(std::forward<T>(src));
+			addSource(std::forward<Ts>(more)...);
 		}
 
 		void compile();
 		
-	private:
-		Shader(GLenum type);		
-		void addSource() {}
-
+	private:		
 		std::vector<std::string> source;
 	};
 }

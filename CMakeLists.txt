@@ -15,6 +15,30 @@ add_library(
   ${FRANK_SRC}
 )
 
+add_executable(
+   test_window
+   "./test/tst.cpp"
+)
+
+target_include_directories(
+  test_window
+  PUBLIC
+  "include"
+  "ext/linmath.h"
+  ${GLFW_INCLUDE_DIR}
+  ${GLEW_INCLUDE_DIR}
+  )
+  
+target_link_libraries(test_window
+  frank
+  ${OpenGL_LIBRARIES}
+  ${OPENGL_gl_LIBRARY}
+  ${OPENGL_glu_LIBRARY}
+  ${GLEW_LIBRARY}
+)
+
+target_compile_definitions(frank PUBLIC -DBUILD_FRANK)
+
 add_definitions(-DGLEW_STATIC)
 
 target_link_libraries(frank

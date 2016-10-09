@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 project(frank CXX)
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLFW REQUIRED)
+find_package(GLM REQUIRED)
 
 add_subdirectory(include)
 add_subdirectory(src)
@@ -27,6 +30,7 @@ target_include_directories(
   "ext/linmath.h"
   ${GLFW_INCLUDE_DIR}
   ${GLEW_INCLUDE_DIR}
+  ${GLM_INCLUDE_DIR}
   )
   
 target_link_libraries(test_window
@@ -56,6 +60,7 @@ target_include_directories(
   "ext/linmath.h"
   ${GLFW_INCLUDE_DIR}
   ${GLEW_INCLUDE_DIR}
+  ${GLM_INCLUDE_DIR}
   )
 
 target_compile_features(frank PRIVATE cxx_range_for)

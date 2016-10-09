@@ -19,7 +19,7 @@ public:
 		Deleter()(handle);
 	}
 
-	GLuint getHandle()
+	GLuint get() const
 	{
 		return handle;
 	}

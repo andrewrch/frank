@@ -4,32 +4,14 @@
 
 namespace frank
 {
-	namespace detail
-	{
-		struct CreateShaderProgram
-		{
-			GLuint operator()()
-			{
-				return glCreateProgram();
-			}
-		};
-		struct DeleteShaderProgram
-		{
-			void operator()(GLint p)
-			{
-				glDeleteProgram(p);
-			}
-		};
-	}
-	using ShaderProgramHandle = Handle<detail::CreateShaderProgram, detail::DeleteShaderProgram>;
-	class ShaderProgram : public ShaderProgramHandle
+	class ShaderProgram
 	{
 	public:
 		template <typename ... Shaders>
 		ShaderProgram(Shaders&& ... s)
 		{
 			initShaders(std::forward<Shaders>(s)...);
-			GLuint program = this->getHandle();
+			GLuint program = handle.get();
 			for (auto&& s : shaders)
 			{
 				s->compile();
@@ -60,7 +42,7 @@ namespace frank
 
 		void link()
 		{
-			GLuint program = this->getHandle();
+			GLuint program = handle.get();
 			glLinkProgram(program);
 			GLint linked;
 			glGetProgramiv(program, GL_LINK_STATUS, &linked);
@@ -74,5 +56,21 @@ namespace frank
 		}
 
 		std::vector<std::unique_ptr<Shader>> shaders;
+
+		struct CreateShaderProgram
+		{
+			GLuint operator()()
+			{
+				return glCreateProgram();
+			}
+		};
+		struct DeleteShaderProgram
+		{
+			void operator()(GLint p)
+			{
+				glDeleteProgram(p);
+			}
+		};
+		Handle<CreateShaderProgram, DeleteShaderProgram> handle;
 	};
 }

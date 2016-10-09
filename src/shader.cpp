@@ -5,7 +5,7 @@ namespace frank
 {
 
 Shader::Shader(GLenum type)
-	: ShaderHandle(type)
+	: handle(type)
 {
 }
 
@@ -23,7 +23,7 @@ std::unique_ptr<Shader> Shader::FromFile(GLenum type, const std::string& filenam
 
 void Shader::compile()
 {
-	GLuint shader = this->getHandle();
+	GLuint shader = handle.get();
 	std::vector<const char*> ptrs;
 	for (auto& s : source)
 	{
@@ -41,6 +41,11 @@ void Shader::compile()
 		glGetShaderInfoLog(shader, len, &len, errorLog.data());
 
 	}
+}
+
+GLuint Shader::getHandle() const
+{
+	return handle.get();
 }
 
 }

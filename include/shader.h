@@ -9,27 +9,7 @@
 
 namespace frank
 {
-	namespace detail
-	{
-		struct CreateShader
-		{
-			GLuint operator()(GLenum type)
-			{
-				return glCreateShader(type);
-			}
-		};
-
-		struct DeleteShader
-		{
-			void operator()(GLuint handle)
-			{
-				glDeleteShader(handle);
-			}
-		};
-	}
-
-	using ShaderHandle = Handle<detail::CreateShader, detail::DeleteShader>;
-	class FRANK_EXPORT Shader : public ShaderHandle
+	class FRANK_EXPORT Shader
 	{
 	public:
 		Shader(GLenum type);
@@ -58,8 +38,29 @@ namespace frank
 		}
 
 		void compile();
+
+		GLuint getHandle() const;
 		
 	private:		
 		std::vector<std::string> source;
+
+
+
+		struct CreateShader
+		{
+			GLuint operator()(GLenum type)
+			{
+				return glCreateShader(type);
+			}
+		};
+
+		struct DeleteShader
+		{
+			void operator()(GLuint handle)
+			{
+				glDeleteShader(handle);
+			}
+		};
+		Handle<CreateShader, DeleteShader> handle;
 	};
 }

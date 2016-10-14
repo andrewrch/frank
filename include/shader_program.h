@@ -27,6 +27,11 @@ namespace frank
 			shaders.clear();
 		}
 
+		void bind()
+		{
+			handle.bind();
+		}
+
 	private:
 		template <typename S>
 		void initShaders(S&& s)
@@ -71,6 +76,13 @@ namespace frank
 				glDeleteProgram(p);
 			}
 		};
-		Handle<CreateShaderProgram, DeleteShaderProgram> handle;
+		struct BindShaderProgram
+		{
+			void operator()(GLint p)
+			{
+				glUseProgram(p);
+			}
+		};
+		Handle<CreateShaderProgram, BindShaderProgram, DeleteShaderProgram> handle;
 	};
 }

@@ -9,32 +9,36 @@
 namespace frank
 {
 template <typename ... Args>
-class FRANK_EXPORT VertexBuffer
+class FRANK_EXPORT Buffer
 {
 public:
 	template <typename ... Args>
-	void addVertex(Args&&... args)
+	void addElement(Args&&... args)
 	{
-		addVertexHelper<0>(std::forward<Args>(args)...);
+		addElementHelper<0>(std::forward<Args>(args)...);
+	}
+	void bind(GLenum target) const
+	{
+		handle.bind(target);
 	}
 
 private:
 	template <int i, typename T, typename ... Args>
-	void addVertexHelper(T&& t, Args&&... args)
+	void addElementHelper(T&& t, Args&&... args)
 	{
-		auto& v = std::get<i>(vertices);
+		auto& v = std::get<i>(elements);
 		v.emplace_back(std::forward<T>(t));
-		addVertexHelper<i + 1>(std::forward<Args>(args)...);
+		addElementHelper<i + 1>(std::forward<Args>(args)...);
 	}
 	template <int i, typename T>
-	void addVertexHelper(T&& t)
+	void addElementHelper(T&& t)
 	{
-		auto& v = std::get<i>(vertices);
-		v.push_back(std::forward<T>(t));
+		auto& v = std::get<i>(elements);
+		v.emplace_back(std::forward<T>(t));
 	}
 	// Vertices aren't interleaved so we can build
 	// by variadic template args
-	std::tuple<std::vector<Args>...> vertices;
+	std::tuple<std::vector<Args>...> elements;
 
 	struct CreateBuffer
 	{
@@ -52,7 +56,14 @@ private:
 			glDeleteBuffers(1, &handle);
 		}
 	};
-	Handle<CreateBuffer, DeleteBuffer> handle;
+	struct BindBuffer
+	{
+		void operator()(GLuint handle, GLenum target)
+		{
+			glBindBuffer(target, handle);
+		}
+	};
+	Handle<CreateBuffer, BindBuffer, DeleteBuffer> handle;
 
 };
 }

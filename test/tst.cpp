@@ -1,11 +1,14 @@
 #include "shader.h"
 #include "shader_program.h"
-#include "vertex_buffer.h"
+#include "buffer.h"
 #include "window.h"
+#include "mesh.h"
 
 #include "GL/wglew.h"
 #include <glm/glm.hpp>
 #include <memory>
+#include <vector>
+#include <array>
 
 using namespace frank;
 
@@ -42,9 +45,17 @@ int main()
 	ShaderProgram s(Shader::FromSource(GL_FRAGMENT_SHADER, frag),
 					Shader::FromSource(GL_VERTEX_SHADER, vertex));
 
-	VertexBuffer<glm::vec3, glm::vec3, glm::vec4> v;
-	v.addVertex(glm::vec3(0, 0, 1), glm::vec3(0, 0, 1), glm::vec4(0, 0, 0, 1));
+	Mesh<glm::vec3> m;
+	m.add(
+		std::array<glm::vec3, 4>{ 
+			glm::vec3(-1, -1, 0),
+			glm::vec3(-1, 1, 0),
+			glm::vec3(1, -1, 0),
+			glm::vec3(1, 1, 0)}, 
+		std::array<unsigned int, 6>{ 0, 1, 2, 2, 1, 3});
 
-	v.addVertex(glm::vec3{ 0, 0, 1 }, glm::vec3{ 0, 0, 1 }, glm::vec4{ 0, 0, 0, 1 });
-	return 1;
+	m.bind();
+	s.bind();
+
+
 }

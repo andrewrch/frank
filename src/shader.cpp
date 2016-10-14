@@ -1,15 +1,12 @@
 #include "shader.h"
 #include <fstream>
 
-namespace frank
-{
-
-Shader::Shader(GLenum type)
+frank::Shader::Shader(GLenum type)
 	: handle(type)
 {
 }
 
-std::unique_ptr<Shader> Shader::FromFile(GLenum type, const std::string& filename)
+std::unique_ptr<frank::Shader> frank::Shader::FromFile(GLenum type, const std::string& filename)
 {
 	std::string source;
 	{
@@ -18,10 +15,10 @@ std::unique_ptr<Shader> Shader::FromFile(GLenum type, const std::string& filenam
 					  std::istreambuf_iterator<char>());
 		f.close();
 	}
-	return Shader::FromSource(type, std::move(source));
+	return frank::Shader::FromSource(type, std::move(source));
 }
 
-void Shader::compile()
+void frank::Shader::compile()
 {
 	GLuint shader = handle.get();
 	std::vector<const char*> ptrs;
@@ -43,9 +40,7 @@ void Shader::compile()
 	}
 }
 
-GLuint Shader::getHandle() const
+GLuint frank::Shader::getHandle() const
 {
 	return handle.get();
-}
-
 }

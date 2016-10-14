@@ -43,9 +43,6 @@ namespace frank
 		
 	private:		
 		std::vector<std::string> source;
-
-
-
 		struct CreateShader
 		{
 			GLuint operator()(GLenum type)
@@ -61,6 +58,14 @@ namespace frank
 				glDeleteShader(handle);
 			}
 		};
-		Handle<CreateShader, DeleteShader> handle;
+		struct BindShader
+		{
+			void operator()(GLuint /*handle*/)
+			{
+				// No op, shaders aren't bounds only programs
+			}
+		};
+
+		Handle<CreateShader, BindShader, DeleteShader> handle;
 	};
 }

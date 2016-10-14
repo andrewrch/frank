@@ -4,7 +4,7 @@
 #include <memory>
 #include <map>
 
-template <typename Creator, typename Deleter>
+template <typename Creator, typename Binder, typename Deleter>
 class Handle
 {
 public:
@@ -17,6 +17,18 @@ public:
 	~Handle()
 	{
 		Deleter()(handle);
+	}
+
+	template <typename ... Args>
+	void bind(Args&& ... data) const
+	{
+		Binder()(handle, data...);
+	}
+	
+	template <typename ... Args>
+	void unBind(Args&& ... data) const
+	{
+		Binder()(0, std::forward<Args>(data...));
 	}
 
 	GLuint get() const

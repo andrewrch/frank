@@ -3,6 +3,24 @@
 #include "buffer.h"
 #include "vao.h"
 #include "valid.h"
+#include <glm/glm.hpp>
+
+template <typename T>
+void configureAttrib(size_t N)
+{
+}
+
+template <>
+void configureAttrib<glm::vec3>(size_t N)
+{
+	glVertexAttribPointer(N, 3, GL_FLOAT, GL_FALSE, 0, 0);
+}
+
+template <>
+void configureAttrib<unsigned int>(size_t N)
+{
+	glVertexAttribPointer(N, 1, GL_UNSIGNED_INT, GL_FALSE, 0, 0);
+}
 
 namespace frank
 {
@@ -24,6 +42,17 @@ namespace frank
 		void add(V&& vertices, I&& indices);
 
 	private:
+		template <size_t N, typename Attrib, typename ... Attribs>
+		void configureAttribs() const
+		{
+			configureAttrib<Attrib>(N);
+			configureAttribs<N + 1, Attribs...>();
+		}
+		template <size_t N>
+		void configureAttribs() const
+		{
+		}
+
 		Vao vao;
 		mutable Valid isValid;
 		Buffer<unsigned int> indexBuffer;
@@ -39,6 +68,7 @@ void frank::Mesh<Args...>::bind() const
 	{
 		vertexBuffer.bind(GL_ARRAY_BUFFER);
 		indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
+		configureAttribs<0, Args...>();
 		isValid.set(true);
 	}
 }

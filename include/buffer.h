@@ -5,6 +5,40 @@
 #include <GL/glew.h>
 #include <vector>
 #include <utility>
+#include <tuple>
+
+template <size_t i>
+struct ElementUnpackerImpl
+{
+	template <typename V, typename E>
+	void operator()(V&& v, E&& e)
+	{
+		std::get<i>(v).emplace_back(std::get<i>(e));
+		ElementUnpackerImpl<i - 1> next;
+		next(v, e);
+	}
+};
+
+template <>
+struct ElementUnpackerImpl<0>
+{
+	template <typename V, typename E>
+	void operator()(V&& v, E&& e)
+	{
+		std::get<0>(v).push_back(std::get<0>(e));
+	}
+};
+
+template <size_t i>
+struct ElementUnpacker
+{
+	template <typename V, typename E>
+	void operator()(V&& v, E&& e)
+	{
+		ElementUnpackerImpl<i - 1> unpacker;
+		unpacker(v, e);
+	}
+};
 
 namespace frank
 {
@@ -12,32 +46,21 @@ template <typename ... Args>
 class FRANK_EXPORT Buffer
 {
 public:
-	template <typename ... Args>
-	void addElement(Args&&... args)
+	template <typename T>
+	void addElement(T&& t)
 	{
-		addElementHelper<0>(std::forward<Args>(args)...);
+		ElementUnpacker<sizeof...(Args)> unpacker;
+		unpacker(elements, t);
 	}
+
+
 	void bind(GLenum target) const
 	{
 		handle.bind(target);
 	}
 
 private:
-	template <int i, typename T, typename ... Args>
-	void addElementHelper(T&& t, Args&&... args)
-	{
-		auto& v = std::get<i>(elements);
-		v.emplace_back(std::forward<T>(t));
-		addElementHelper<i + 1>(std::forward<Args>(args)...);
-	}
-	template <int i, typename T>
-	void addElementHelper(T&& t)
-	{
-		auto& v = std::get<i>(elements);
-		v.emplace_back(std::forward<T>(t));
-	}
-	// Vertices aren't interleaved so we can build
-	// by variadic template args
+
 	std::tuple<std::vector<Args>...> elements;
 
 	struct CreateBuffer

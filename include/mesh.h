@@ -30,7 +30,8 @@ namespace frank
 	public:
 		void bind() const;
 
-		void addVertex(Args&& ... args);
+		template <typename T>
+		void addVertex(T&& args);
 
 		template <typename T>
 		void addVertices(T&& v);
@@ -74,9 +75,10 @@ void frank::Mesh<Args...>::bind() const
 }
 
 template <typename ... Args>
-void frank::Mesh<Args...>::addVertex(Args&& ... args)
+template <typename T>
+void frank::Mesh<Args...>::addVertex(T&& vertex)
 {
-	vertexBuffer.addElement(std::forward<Args>(args)...);
+	vertexBuffer.addElement(std::forward<std::tuple<Args...>>(vertex));
 }
 
 template <typename ... Args>
@@ -85,7 +87,8 @@ void frank::Mesh<Args...>::addVertices(T&& v)
 {
 	for (auto&& i : v)
 	{
-		addVertex(std::forward<Args>(i)...);
+		//addVertex(std::forward<Args>(i)...);
+		addVertex(std::forward<std::tuple<Args...>>(i));
 	}
 }
 
@@ -95,7 +98,7 @@ void frank::Mesh<Args...>::addIndices(T&& indices)
 {
 	for (auto&& i : indices)
 	{
-		indexBuffer.addElement(std::forward<unsigned int>(i));
+		indexBuffer.addElement(std::forward<std::tuple<unsigned int>>(i));
 	}
 }
 
